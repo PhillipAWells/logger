@@ -1,7 +1,3 @@
-# AGENTS.md
-
-This file provides guidance to AI coding agents when working with code in this repository.
-
 ## Project Overview
 
 `@pawells/logger` is a structured logging library for TypeScript/Node.js published to npm. It targets ES2022, is distributed as ESM, and has no runtime dependencies. The library provides configurable logging with support for multiple transports and formatters, including JSON formatting for log aggregation platforms. It exports from a single entry point (`src/index.ts`).
@@ -109,3 +105,8 @@ A custom `.devcontainer/Dockerfile` is provided with:
 - Post-creation hook (`.devcontainer/scripts/postCreate.sh`) to set up the development environment
 
 Use `devcontainer open` or your IDE's container integration to develop in the containerized environment.
+
+## IMPORTANT
+
+NEVER ADD CLAUDE CO-AUTHOR CREDITS OR "GENERATED WITH..." FOOTERS.
+
