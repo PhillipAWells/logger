@@ -1,15 +1,27 @@
-import type { ILogEntry, ILoggerConfig, ITransport } from './types.ts';
-import { formatForJson } from './json-formatter.ts';
+import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
+import { formatForJson } from './json-formatter.js';
 
 const NANOSECONDS_TO_MILLISECONDS = 1000000;
 
+/**
+ * ConsoleTransport outputs log entries to the console with ANSI color formatting.
+ * Supports both text and JSON output formats.
+ */
 export class ConsoleTransport implements ITransport {
 	private readonly config: ILoggerConfig;
 
+	/**
+	 * Creates a new ConsoleTransport instance.
+	 * @param config - Logger configuration object
+	 */
 	constructor(config: ILoggerConfig) {
 		this.config = config;
 	}
 
+	/**
+	 * Writes a log entry to the console.
+	 * @param entry - The log entry to write
+	 */
 	public write(entry: ILogEntry): void {
 		const format = this.config.format ?? 'text';
 
@@ -43,6 +55,8 @@ export class ConsoleTransport implements ITransport {
 				return `\x1b[33m${level}\x1b[0m`; // Yellow
 			case 'ERROR':
 				return `\x1b[31m${level}\x1b[0m`; // Red
+			case 'FATAL':
+				return `\x1b[35m${level}\x1b[0m`; // Magenta
 			default:
 				return level;
 		}
