@@ -35,16 +35,17 @@ import { Logger, ConsoleTransport, LogLevel } from '@pawells/logger';
 
 // Create a logger instance
 const logger = new Logger({
+  service: 'my-app',
   level: LogLevel.DEBUG,
-  transports: [new ConsoleTransport()],
+  transport: new ConsoleTransport(),
 });
 
 // Log messages at different levels
-logger.debug('Debug information', { userId: 123 });
-logger.info('Application started');
-logger.warn('Memory usage is high', { usage: 85 });
-logger.error('Request failed', { statusCode: 500 });
-logger.fatal('System critical error', { errno: 'EACCES' });
+await logger.debug('Debug information', { userId: 123 });
+await logger.info('Application started');
+await logger.warn('Memory usage is high', { usage: 85 });
+await logger.error('Request failed', { statusCode: 500 });
+await logger.fatal('System critical error', { errno: 'EACCES' });
 ```
 
 ## API Reference
@@ -60,29 +61,30 @@ constructor(config: ILoggerConfig)
 ```
 
 **ILoggerConfig**:
-- `level: LogLevel` — Minimum log level to output
-- `transports: ITransport[]` — Array of transports to send logs to
-- `metadata?: Record<string, unknown>` — Global metadata added to all log entries
+- `service: string` — Required service name for the logger
+- `level?: LogLevel` — Minimum log level to output (defaults to INFO)
+- `format?: 'json' | 'text'` — Output format (defaults to 'text')
+- `transport?: ITransport` — Transport to send logs to (defaults to ConsoleTransport)
 
 #### Methods
 
 ```typescript
-debug(message: string, metadata?: Record<string, unknown>): void
-info(message: string, metadata?: Record<string, unknown>): void
-warn(message: string, metadata?: Record<string, unknown>): void
-error(message: string, metadata?: Record<string, unknown>): void
-fatal(message: string, metadata?: Record<string, unknown>): void
+async debug(message: string, metadata?: Record<string, unknown>): Promise<void>
+async info(message: string, metadata?: Record<string, unknown>): Promise<void>
+async warn(message: string, metadata?: Record<string, unknown>): Promise<void>
+async error(message: string, metadata?: Record<string, unknown>): Promise<void>
+async fatal(message: string, metadata?: Record<string, unknown>): Promise<void>
 ```
 
 ### LogLevel Enum
 
 ```typescript
 enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
-  FATAL = 4,
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+  FATAL = 'fatal',
 }
 ```
 
@@ -93,10 +95,11 @@ Outputs log entries to the console with ANSI color formatting.
 ```typescript
 import { ConsoleTransport } from '@pawells/logger';
 
-const transport = new ConsoleTransport();
+const transport = new ConsoleTransport({ service: 'my-app' });
 const logger = new Logger({
+  service: 'my-app',
   level: LogLevel.INFO,
-  transports: [transport],
+  transport: transport,
 });
 ```
 
@@ -105,17 +108,18 @@ const logger = new Logger({
 Formats log entries as structured JSON compatible with log aggregation platforms.
 
 ```typescript
-import { formatForJson, ILogEntry } from '@pawells/logger';
+import { formatForJson, ILogEntry, LogLevel } from '@pawells/logger';
 
 const logEntry: ILogEntry = {
+  timestamp: Date.now().toString(),
   level: LogLevel.INFO,
+  service: 'my-app',
   message: 'User login successful',
-  timestamp: BigInt(Date.now() * 1000000),
   metadata: { userId: '42' },
 };
 
 const jsonOutput = formatForJson(logEntry);
-// Output: {"level":"INFO","message":"User login successful","timestamp":"1...","metadata":{"userId":"42"}}
+// Output: {"timestamp":"1705257983000000000","level":"info","service":"my-app","message":"User login successful","metadata":{"userId":"42"}}
 ```
 
 ### ITransport Interface
@@ -124,14 +128,15 @@ Implement this interface to create custom transports.
 
 ```typescript
 interface ITransport {
-  send(entry: ILogEntry): void | Promise<void>;
+  write(entry: ILogEntry): void | Promise<void>;
 }
 ```
 
 **ILogEntry**:
+- `timestamp: string` — Nanosecond-precision timestamp as string
 - `level: LogLevel` — Log level
+- `service: string` — Service name
 - `message: string` — Log message
-- `timestamp: bigint` — Nanosecond-precision timestamp
 - `metadata?: Record<string, unknown>` — Contextual metadata
 - `traceId?: string` — Distributed trace ID
 - `spanId?: string` — Distributed span ID
@@ -147,7 +152,7 @@ import { Logger, ITransport, ILogEntry, LogLevel } from '@pawells/logger';
 class FileTransport implements ITransport {
   constructor(private filePath: string) {}
 
-  async send(entry: ILogEntry): Promise<void> {
+  async write(entry: ILogEntry): Promise<void> {
     const line = `[${entry.level}] ${entry.message}\n`;
     // Write to file (implementation varies by use case)
     await appendToFile(this.filePath, line);
@@ -155,8 +160,9 @@ class FileTransport implements ITransport {
 }
 
 const logger = new Logger({
+  service: 'my-app',
   level: LogLevel.INFO,
-  transports: [new FileTransport('./logs/app.log')],
+  transport: new FileTransport('./logs/app.log'),
 });
 ```
 
@@ -165,12 +171,12 @@ const logger = new Logger({
 For log aggregation with external platforms:
 
 ```typescript
-import { Logger, formatForJson, LogLevel } from '@pawells/logger';
+import { Logger, ITransport, ILogEntry, formatForJson, LogLevel } from '@pawells/logger';
 
 class AggregationTransport implements ITransport {
   constructor(private endpoint: string) {}
 
-  async send(entry: ILogEntry): Promise<void> {
+  async write(entry: ILogEntry): Promise<void> {
     const jsonOutput = formatForJson(entry);
     await fetch(this.endpoint, {
       method: 'POST',
@@ -181,8 +187,9 @@ class AggregationTransport implements ITransport {
 }
 
 const logger = new Logger({
+  service: 'my-app',
   level: LogLevel.DEBUG,
-  transports: [new AggregationTransport('https://aggregation.example.com/api/v1/push')],
+  transport: new AggregationTransport('https://aggregation.example.com/api/v1/push'),
 });
 ```
 
