@@ -1,0 +1,141 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "yarn: build",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["build"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "yarn: dev",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["dev"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "yarn: watch",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["watch"],
+			"group": "build",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "yarn: typecheck",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["typecheck"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "yarn: test",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["test"],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: test:ui",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["test:ui"],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: test:coverage",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["test:coverage"],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: lint",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["lint"],
+			"group": "none",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: lint:fix",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["lint:fix"],
+			"group": "none",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: start",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["start"],
+			"group": "none",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yarn: pipeline",
+			"type": "shell",
+			"command": "yarn",
+			"args": ["pipeline"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": ["$tsc"]
+		}
+	]
+}
