@@ -1,0 +1,226 @@
+# @pawells/logger
+
+[![npm](https://img.shields.io/npm/v/@pawells/logger)](https://www.npmjs.com/package/@pawells/logger)
+[![GitHub Release](https://img.shields.io/github/v/release/PhillipAWells/logger)](https://github.com/PhillipAWells/logger/releases)
+[![CI](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+Structured logging library for TypeScript/Node.js with ESM, no runtime dependencies, and support for multiple transports and formatters for structured logging and log aggregation.
+
+## Features
+
+- Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL)
+- Multiple built-in transports: Console (with ANSI colors)
+- Pluggable transport system for custom integrations
+- JSON formatter for log aggregation platforms
+- Nanosecond-precision timestamps
+- Support for metadata and tracing fields (traceId, spanId, correlationId)
+- Full TypeScript support with strict typing
+- ESM-only, no runtime dependencies
+- Targets ES2022, runs on Node.js >= 24.0.0
+
+## Installation
+
+```bash
+npm install @pawells/logger
+# or
+yarn add @pawells/logger
+```
+
+## Quick Start
+
+```typescript
+import { Logger, ConsoleTransport, LogLevel } from '@pawells/logger';
+
+// Create a logger instance
+const logger = new Logger({
+  level: LogLevel.DEBUG,
+  transports: [new ConsoleTransport()],
+});
+
+// Log messages at different levels
+logger.debug('Debug information', { userId: 123 });
+logger.info('Application started');
+logger.warn('Memory usage is high', { usage: 85 });
+logger.error('Request failed', { statusCode: 500 });
+logger.fatal('System critical error', { errno: 'EACCES' });
+```
+
+## API Reference
+
+### Logger Class
+
+Main logging interface with methods for each log level.
+
+#### Constructor
+
+```typescript
+constructor(config: ILoggerConfig)
+```
+
+**ILoggerConfig**:
+- `level: LogLevel` — Minimum log level to output
+- `transports: ITransport[]` — Array of transports to send logs to
+- `metadata?: Record<string, unknown>` — Global metadata added to all log entries
+
+#### Methods
+
+```typescript
+debug(message: string, metadata?: Record<string, unknown>): void
+info(message: string, metadata?: Record<string, unknown>): void
+warn(message: string, metadata?: Record<string, unknown>): void
+error(message: string, metadata?: Record<string, unknown>): void
+fatal(message: string, metadata?: Record<string, unknown>): void
+```
+
+### LogLevel Enum
+
+```typescript
+enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+  FATAL = 4,
+}
+```
+
+### ConsoleTransport
+
+Outputs log entries to the console with ANSI color formatting.
+
+```typescript
+import { ConsoleTransport } from '@pawells/logger';
+
+const transport = new ConsoleTransport();
+const logger = new Logger({
+  level: LogLevel.INFO,
+  transports: [transport],
+});
+```
+
+### formatForJson()
+
+Formats log entries as structured JSON compatible with log aggregation platforms.
+
+```typescript
+import { formatForJson, ILogEntry } from '@pawells/logger';
+
+const logEntry: ILogEntry = {
+  level: LogLevel.INFO,
+  message: 'User login successful',
+  timestamp: BigInt(Date.now() * 1000000),
+  metadata: { userId: '42' },
+};
+
+const jsonOutput = formatForJson(logEntry);
+// Output: {"level":"INFO","message":"User login successful","timestamp":"1...","metadata":{"userId":"42"}}
+```
+
+### ITransport Interface
+
+Implement this interface to create custom transports.
+
+```typescript
+interface ITransport {
+  send(entry: ILogEntry): void | Promise<void>;
+}
+```
+
+**ILogEntry**:
+- `level: LogLevel` — Log level
+- `message: string` — Log message
+- `timestamp: bigint` — Nanosecond-precision timestamp
+- `metadata?: Record<string, unknown>` — Contextual metadata
+- `traceId?: string` — Distributed trace ID
+- `spanId?: string` — Distributed span ID
+- `correlationId?: string` — Correlation ID for request tracking
+
+## Custom Transport Example
+
+Create a custom transport to send logs to an external service:
+
+```typescript
+import { Logger, ITransport, ILogEntry, LogLevel } from '@pawells/logger';
+
+class FileTransport implements ITransport {
+  constructor(private filePath: string) {}
+
+  async send(entry: ILogEntry): Promise<void> {
+    const line = `[${entry.level}] ${entry.message}\n`;
+    // Write to file (implementation varies by use case)
+    await appendToFile(this.filePath, line);
+  }
+}
+
+const logger = new Logger({
+  level: LogLevel.INFO,
+  transports: [new FileTransport('./logs/app.log')],
+});
+```
+
+## Log Aggregation Integration
+
+For log aggregation with external platforms:
+
+```typescript
+import { Logger, formatForJson, LogLevel } from '@pawells/logger';
+
+class AggregationTransport implements ITransport {
+  constructor(private endpoint: string) {}
+
+  async send(entry: ILogEntry): Promise<void> {
+    const jsonOutput = formatForJson(entry);
+    await fetch(this.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonOutput,
+    });
+  }
+}
+
+const logger = new Logger({
+  level: LogLevel.DEBUG,
+  transports: [new AggregationTransport('https://aggregation.example.com/api/v1/push')],
+});
+```
+
+## TypeScript Support
+
+Full TypeScript support with strict typing. All types are exported for custom implementations:
+
+```typescript
+import {
+  Logger,
+  LogLevel,
+  ILogEntry,
+  ILoggerConfig,
+  ITransport,
+  ConsoleTransport,
+  formatForJson,
+} from '@pawells/logger';
+```
+
+## Development
+
+```bash
+yarn install        # Install dependencies
+yarn build          # Compile TypeScript (tsconfig.build.json) → ./build/
+yarn dev            # Build + run
+yarn watch          # Watch mode
+yarn typecheck      # Type check without building
+yarn lint           # ESLint
+yarn lint:fix       # ESLint with auto-fix
+yarn test           # Run tests
+yarn test:ui        # Interactive Vitest UI
+yarn test:coverage  # Tests with coverage report
+```
+
+## Requirements
+
+- Node.js >= 24.0.0
+
+## License
+
+MIT — See [LICENSE](./LICENSE) for details.
