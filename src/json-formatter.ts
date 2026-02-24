@@ -1,4 +1,20 @@
-import type { ILogEntry } from './types.ts';
+import type { ILogEntry } from './types.js';
+
+/**
+ * Safely converts a value to JSON string, handling circular references.
+ * @param obj - The object to stringify
+ * @returns JSON string representation
+ */
+function safeStringify(obj: unknown): string {
+	const seen = new WeakSet();
+	return JSON.stringify(obj, (_key, value: unknown) => {
+		if (typeof value === 'object' && value !== null) {
+			if (seen.has(value as object)) return '[Circular]';
+			seen.add(value as object);
+		}
+		return value;
+	});
+}
 
 /**
  * Formats a log entry as structured JSON for log aggregation platforms.
@@ -21,11 +37,10 @@ export function formatForJson(entry: ILogEntry): string {
 			metadata: entry.metadata ?? {},
 		};
 
-		return JSON.stringify(jsonEntry);
+		return safeStringify(jsonEntry);
 	} catch (error) {
-		// Don't throw - just log to console and return a safe fallback
-		console.error('Error formatting log entry to JSON:', error);
-		return JSON.stringify({
+		// Don't use console - return a safe fallback JSON string
+		return safeStringify({
 			timestamp,
 			level,
 			service,
