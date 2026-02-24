@@ -1,6 +1,6 @@
-import { formatForJson } from './json-formatter.ts';
-import type { ILogEntry } from './types.ts';
-import { LogLevel } from './types.ts';
+import { formatForJson } from './json-formatter.js';
+import type { ILogEntry } from './types.js';
+import { LogLevel } from './types.js';
 
 describe('formatForJson', () => {
 	it('should format a basic log entry correctly', () => {
@@ -62,8 +62,11 @@ describe('formatForJson', () => {
 			metadata: circular,
 		};
 
-		// Should not throw, but JSON.stringify will handle circular refs
-		expect(() => formatForJson(entry)).not.toThrow();
+		// Should not throw
+		const result = formatForJson(entry);
+		expect(() => JSON.parse(result)).not.toThrow();
+		const parsed = JSON.parse(result);
+		expect(parsed.metadata.self).toBe('[Circular]');
 	});
 
 	it('should return valid JSON on all inputs', () => {
