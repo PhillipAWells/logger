@@ -63,13 +63,13 @@ The library uses a pluggable transport system via the `ITransport` interface. Tr
 
 ```typescript
 interface ITransport {
-  send(entry: ILogEntry): void | Promise<void>;
+  write(entry: ILogEntry): void | Promise<void>;
 }
 ```
 
 ## Key Patterns
 
-**Adding a new transport**: Implement the `ITransport` interface with a `send()` method, place in `src/`, and re-export from `src/index.ts`.
+**Adding a new transport**: Implement the `ITransport` interface with a `write()` method, place in `src/`, and re-export from `src/index.ts`.
 
 **Adding a new formatter**: Implement a formatting function that accepts `ILogEntry` and returns formatted output, place in `src/`, and re-export from `src/index.ts`.
 

@@ -93,9 +93,9 @@ enum LogLevel {
 Outputs log entries to the console with ANSI color formatting.
 
 ```typescript
-import { ConsoleTransport } from '@pawells/logger';
+import { ConsoleTransport, LogLevel } from '@pawells/logger';
 
-const transport = new ConsoleTransport({ service: 'my-app' });
+const transport = new ConsoleTransport({ service: 'my-app', level: LogLevel.INFO });
 const logger = new Logger({
   service: 'my-app',
   level: LogLevel.INFO,
