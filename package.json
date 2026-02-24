@@ -1,7 +1,7 @@
 {
 	"name": "@pawells/logger",
 	"displayName": "@pawells/logger",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Structured logging library for TypeScript/Node.js with support for multiple transports and log aggregation",
 	"type": "module",
 	"main": "./build/index.js",
