@@ -25,5 +25,5 @@ export interface ILoggerConfig {
 }
 
 export interface ITransport {
-	write(entry: ILogEntry): void;
+	write(entry: ILogEntry): void | Promise<void>;
 }

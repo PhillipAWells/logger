@@ -1,9 +1,14 @@
-import type { ILogEntry, ILoggerConfig, ITransport } from './types.ts';
-import { LogLevel } from './types.ts';
-import { ConsoleTransport } from './console-transport.ts';
+import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
+import { LogLevel } from './types.js';
+import { ConsoleTransport } from './console-transport.js';
 
-const NANOSECONDS_PER_MILLISECOND = 1000000;
+const NANOSECONDS_PER_MILLISECOND = 1_000_000_000;
 
+/**
+ * Logger class providing structured logging with configurable levels and transports.
+ * Supports multiple log levels (DEBUG, INFO, WARN, ERROR, FATAL) and pluggable transports
+ * for custom delivery mechanisms.
+ */
 export class Logger {
 	private readonly config: ILoggerConfig;
 
@@ -11,7 +16,16 @@ export class Logger {
 
 	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL];
 
+	/**
+	 * Creates a new Logger instance.
+	 * @param config - Configuration object with service name, optional level, format, and transport
+	 * @throws Error if service name is not provided or is empty
+	 */
 	constructor(config: ILoggerConfig) {
+		if (!config.service?.trim()) {
+			throw new Error('Logger requires a non-empty service name');
+		}
+
 		this.config = {
 			level: LogLevel.INFO,
 			format: 'text',
@@ -20,27 +34,57 @@ export class Logger {
 		this.transport = this.config.transport ?? new ConsoleTransport(this.config);
 	}
 
-	public debug(message: string, metadata?: Record<string, unknown>): void {
-		this.log(LogLevel.DEBUG, message, metadata);
+	/**
+	 * Logs a debug-level message.
+	 * @param message - The message to log
+	 * @param metadata - Optional metadata object to include with the log entry
+	 */
+	// eslint-disable-next-line require-await
+	public async debug(message: string, metadata?: Record<string, unknown>): Promise<void> {
+		return this.log(LogLevel.DEBUG, message, metadata);
 	}
 
-	public info(message: string, metadata?: Record<string, unknown>): void {
-		this.log(LogLevel.INFO, message, metadata);
+	/**
+	 * Logs an info-level message.
+	 * @param message - The message to log
+	 * @param metadata - Optional metadata object to include with the log entry
+	 */
+	// eslint-disable-next-line require-await
+	public async info(message: string, metadata?: Record<string, unknown>): Promise<void> {
+		return this.log(LogLevel.INFO, message, metadata);
 	}
 
-	public warn(message: string, metadata?: Record<string, unknown>): void {
-		this.log(LogLevel.WARN, message, metadata);
+	/**
+	 * Logs a warn-level message.
+	 * @param message - The message to log
+	 * @param metadata - Optional metadata object to include with the log entry
+	 */
+	// eslint-disable-next-line require-await
+	public async warn(message: string, metadata?: Record<string, unknown>): Promise<void> {
+		return this.log(LogLevel.WARN, message, metadata);
 	}
 
-	public error(message: string, metadata?: Record<string, unknown>): void {
-		this.log(LogLevel.ERROR, message, metadata);
+	/**
+	 * Logs an error-level message.
+	 * @param message - The message to log
+	 * @param metadata - Optional metadata object to include with the log entry
+	 */
+	// eslint-disable-next-line require-await
+	public async error(message: string, metadata?: Record<string, unknown>): Promise<void> {
+		return this.log(LogLevel.ERROR, message, metadata);
 	}
 
-	public fatal(message: string, metadata?: Record<string, unknown>): void {
-		this.log(LogLevel.FATAL, message, metadata);
+	/**
+	 * Logs a fatal-level message.
+	 * @param message - The message to log
+	 * @param metadata - Optional metadata object to include with the log entry
+	 */
+	// eslint-disable-next-line require-await
+	public async fatal(message: string, metadata?: Record<string, unknown>): Promise<void> {
+		return this.log(LogLevel.FATAL, message, metadata);
 	}
 
-	private log(level: LogLevel, message: string, metadata?: Record<string, unknown>): void {
+	private async log(level: LogLevel, message: string, metadata?: Record<string, unknown>): Promise<void> {
 		if (!this.shouldLog(level)) {
 			return;
 		}
@@ -53,7 +97,7 @@ export class Logger {
 			...(metadata && { metadata }),
 		};
 
-		this.transport.write(entry);
+		await this.transport.write(entry);
 	}
 
 	private shouldLog(level: LogLevel): boolean {
