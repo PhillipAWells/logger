@@ -1,5 +1,5 @@
-export { Logger } from './logger.ts';
-export { formatForJson } from './json-formatter.ts';
-export { ConsoleTransport } from './console-transport.ts';
-export { LogLevel } from './types.ts';
-export type { ILogEntry, ILoggerConfig, ITransport } from './types.ts';
+export { Logger } from './logger.js';
+export { formatForJson } from './json-formatter.js';
+export { ConsoleTransport } from './console-transport.js';
+export { LogLevel } from './types.js';
+export type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
