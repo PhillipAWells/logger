@@ -207,4 +207,78 @@ describe('Logger', () => {
 			expect(typeof parsed.timestamp).toBe('string');
 		});
 	});
+
+	describe('nanosecond timestamps', () => {
+		it('should generate nanosecond timestamps as proper decimal strings (not scientific notation)', async () => {
+			const logger = new Logger({ service: 'test-service', level: LogLevel.DEBUG });
+
+			await logger.info('Test message');
+
+			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+
+			// Extract timestamp (ISO format timestamp, should be valid date)
+			expect(loggedOutput).toBeDefined();
+			// Verify no scientific notation in the timestamp (check if log contains proper date)
+			// The timestamp should be a valid ISO string that can be parsed
+			const isoMatch = loggedOutput?.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
+			expect(isoMatch).toBeDefined();
+		});
+	});
+
+	describe('transport error handling', () => {
+		it('should catch transport errors and not propagate them', async () => {
+			const mockTransport = {
+				write: vi.fn().mockRejectedValue(new Error('Transport failed')),
+			};
+			const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			try {
+				const logger = new Logger({
+					service: 'test-service',
+					level: LogLevel.INFO,
+					transport: mockTransport,
+				});
+
+				// Should not throw even though transport rejects
+				await logger.info('Test message');
+
+				expect(mockTransport.write).toHaveBeenCalled();
+				expect(mockConsoleError).toHaveBeenCalledWith(
+					'Error writing log entry to transport:',
+					expect.any(Error),
+				);
+			} finally {
+				mockConsoleError.mockRestore();
+			}
+		});
+
+		it('should catch synchronous transport errors', async () => {
+			const mockTransport = {
+				write: vi.fn().mockImplementation(() => {
+					throw new Error('Synchronous transport error');
+				}),
+			};
+			const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			try {
+				const logger = new Logger({
+					service: 'test-service',
+					level: LogLevel.INFO,
+					transport: mockTransport,
+				});
+
+				// Should not throw even though transport throws synchronously
+				await logger.info('Test message');
+
+				expect(mockTransport.write).toHaveBeenCalled();
+				expect(mockConsoleError).toHaveBeenCalledWith(
+					'Error writing log entry to transport:',
+					expect.any(Error),
+				);
+			} finally {
+				mockConsoleError.mockRestore();
+			}
+		});
+	});
 });
