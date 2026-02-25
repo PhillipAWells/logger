@@ -29,13 +29,24 @@ export function formatForJson(entry: ILogEntry): string {
 	const { service } = entry;
 
 	try {
-		const jsonEntry = {
+		const jsonEntry: Record<string, unknown> = {
 			timestamp,
 			level,
 			service,
 			message: entry.message,
 			metadata: entry.metadata ?? {},
 		};
+
+		// Add optional trace fields if present
+		if (entry.traceId) {
+			jsonEntry.traceId = entry.traceId;
+		}
+		if (entry.spanId) {
+			jsonEntry.spanId = entry.spanId;
+		}
+		if (entry.correlationId) {
+			jsonEntry.correlationId = entry.correlationId;
+		}
 
 		return safeStringify(jsonEntry);
 	} catch (error) {

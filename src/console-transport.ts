@@ -42,7 +42,20 @@ export class ConsoleTransport implements ITransport {
 			? ` ${JSON.stringify(entry.metadata)}`
 			: '';
 
-		console.log(`${timestamp} ${coloredLevel} [${entry.service}] ${entry.message}${metadata}`);
+		// Build trace info string if any trace fields are present
+		const traceInfo: string[] = [];
+		if (entry.traceId) {
+			traceInfo.push(`traceId=${entry.traceId}`);
+		}
+		if (entry.spanId) {
+			traceInfo.push(`spanId=${entry.spanId}`);
+		}
+		if (entry.correlationId) {
+			traceInfo.push(`correlationId=${entry.correlationId}`);
+		}
+		const traceString = traceInfo.length > 0 ? ` [${traceInfo.join(', ')}]` : '';
+
+		console.log(`${timestamp} ${coloredLevel} [${entry.service}]${traceString} ${entry.message}${metadata}`);
 	}
 
 	private colorizeLevel(level: string): string {
