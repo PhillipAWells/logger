@@ -1,8 +1,8 @@
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
-
-const NANOSECONDS_PER_MILLISECOND = 1_000_000_000;
+ 
+const NANOSECONDS_PER_MILLISECOND = 1_000_000_000n;
 
 /**
  * Logger class providing structured logging with configurable levels and transports.
@@ -90,14 +90,18 @@ export class Logger {
 		}
 
 		const entry: ILogEntry = {
-			timestamp: (Date.now() * NANOSECONDS_PER_MILLISECOND).toString(), // Unix epoch nanoseconds as string
+			timestamp: (BigInt(Date.now()) * NANOSECONDS_PER_MILLISECOND).toString(), // Unix epoch nanoseconds as string using BigInt
 			level,
 			service: this.config.service,
 			message,
 			...(metadata && { metadata }),
 		};
 
-		await this.transport.write(entry);
+		try {
+			await this.transport.write(entry);
+		} catch (error) {
+			console.error('Error writing log entry to transport:', error);
+		}
 	}
 
 	private shouldLog(level: LogLevel): boolean {
