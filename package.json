@@ -69,11 +69,7 @@
 	},
 	"packageManager": "yarn@4.12.0",
 	"files": [
-		"build/**/*.js",
-		"build/**/*.d.ts",
-		"build/**/*.js.map",
-		"build/**/*.d.ts.map",
-		"!build/**/*.test.*",
+		"build/",
 		"README.md",
 		"LICENSE",
 		".env.example"
