@@ -436,7 +436,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^10.0.1"
     "@stylistic/eslint-plugin": "npm:^5.9.0"
-    "@types/node": "npm:^25.3.0"
+    "@types/node": "npm:^25.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^8.0.0"
     "@typescript-eslint/parser": "npm:^8.0.0"
     "@vitest/coverage-v8": "npm:^4.0.18"
@@ -445,7 +445,7 @@ __metadata:
     eslint-import-resolver-typescript: "npm:^4.4.4"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-unused-imports: "npm:^4.0.0"
-    globals: "npm:^17.3.0"
+    globals: "npm:^17.4.0"
     husky: "npm:^9.1.7"
     typescript: "npm:^5.3.3"
     vitest: "npm:^4.0.18"
@@ -718,12 +718,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^25.3.0":
-  version: 25.3.0
-  resolution: "@types/node@npm:25.3.0"
+"@types/node@npm:^25.3.3":
+  version: 25.3.5
+  resolution: "@types/node@npm:25.3.5"
   dependencies:
     undici-types: "npm:~7.18.0"
-  checksum: 10c0/7b2b18c9d68047157367fc2f786d4f166d22dc0ad9f82331ca02fb16f2f391854123dbe604dcb938cda119c87051e4bb71dcb9ece44a579f483a6f96d4bd41de
+  checksum: 10c0/4cf0834a6f6933bf0aca6afead117ae3db3b8f02a5f7187a24f871db0fb9344e5e46573ba387bc53b7505e1e219c4c535cbe67221ced95bb5ad98573223b19d0
   languageName: node
   linkType: hard
 
@@ -2214,10 +2214,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^17.3.0":
-  version: 17.3.0
-  resolution: "globals@npm:17.3.0"
-  checksum: 10c0/7f21443ecaa60c6e9ff56d9fb6f10a9b5f9514e7f22e5392f715472bb220ce31c865ebf414a32695150e733fb3e1013e6322dbce70fddd1e066f372b8d55a4b8
+"globals@npm:^17.4.0":
+  version: 17.4.0
+  resolution: "globals@npm:17.4.0"
+  checksum: 10c0/2be9e8c2b9035836f13d420b22f0247a328db82967d3bebfc01126d888ed609305f06c05895914e969653af5c6ba35fd7a0920f3e6c869afa60666c810630feb
   languageName: node
   linkType: hard
 
