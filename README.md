@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@pawells/logger)](https://www.npmjs.com/package/@pawells/logger)
 [![GitHub Release](https://img.shields.io/github/v/release/PhillipAWells/logger)](https://github.com/PhillipAWells/logger/releases)
 [![CI](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml)
-[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Structured logging library for TypeScript/Node.js with ESM, no runtime dependencies, and support for multiple transports and formatters for structured logging and log aggregation.
@@ -18,7 +18,7 @@ Structured logging library for TypeScript/Node.js with ESM, no runtime dependenc
 - Support for metadata and tracing fields (traceId, spanId, correlationId)
 - Full TypeScript support with strict typing
 - ESM-only, no runtime dependencies
-- Targets ES2022, runs on Node.js >= 24.0.0
+- Targets ES2022, runs on Node.js >= 22.0.0
 
 ## Installation
 
@@ -263,7 +263,7 @@ yarn test:coverage  # Tests with coverage report
 
 ## Requirements
 
-- Node.js >= 24.0.0
+- Node.js >= 22.0.0
 
 ## License
 
