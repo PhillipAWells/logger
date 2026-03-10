@@ -10,7 +10,7 @@ Structured logging library for TypeScript/Node.js with ESM, no runtime dependenc
 
 ## Features
 
-- Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL)
+- Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL, SILENT)
 - Multiple built-in transports: Console (with ANSI colors)
 - Pluggable transport system for custom integrations
 - JSON formatter for log aggregation platforms
@@ -85,6 +85,7 @@ enum LogLevel {
   WARN = 'warn',
   ERROR = 'error',
   FATAL = 'fatal',
+  SILENT = 'silent', // suppresses all output when set as the logger level
 }
 ```
 
@@ -192,6 +193,42 @@ const logger = new Logger({
   transport: new AggregationTransport('https://aggregation.example.com/api/v1/push'),
 });
 ```
+
+## Testing
+
+The package ships mock transport factories for use in unit tests. Import from the subpath that matches your test framework.
+
+### Vitest
+
+```typescript
+import { createMockTransport } from '@pawells/logger/testing/vitest';
+import { Logger, LogLevel } from '@pawells/logger';
+
+const transport = createMockTransport();
+const logger = new Logger({ service: 'my-app', level: LogLevel.DEBUG, transport });
+
+await logger.info('hello');
+
+expect(transport.write).toHaveBeenCalledOnce();
+expect(transport.write.mock.calls[0][0].message).toBe('hello');
+```
+
+### Jest
+
+```typescript
+import { createMockTransport } from '@pawells/logger/testing/jest';
+import { Logger, LogLevel } from '@pawells/logger';
+
+const transport = createMockTransport();
+const logger = new Logger({ service: 'my-app', level: LogLevel.DEBUG, transport });
+
+await logger.info('hello');
+
+expect(transport.write).toHaveBeenCalledTimes(1);
+expect(transport.write.mock.calls[0][0].message).toBe('hello');
+```
+
+`transport.write` is a typed spy (`vi.fn()` / `jest.fn()`) whose argument is `ILogEntry`, so all standard mock assertion APIs are available.
 
 ## TypeScript Support
 
