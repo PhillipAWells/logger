@@ -4,6 +4,7 @@ export enum LogLevel {
 	WARN = 'warn',
 	ERROR = 'error',
 	FATAL = 'fatal',
+	SILENT = 'silent',
 }
 
 export interface ILogEntry {

@@ -14,7 +14,7 @@ export class Logger {
 
 	private readonly transport: ITransport;
 
-	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL];
+	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.SILENT];
 
 	/**
 	 * Creates a new Logger instance.
