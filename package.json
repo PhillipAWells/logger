@@ -10,6 +10,14 @@
 		".": {
 			"types": "./build/index.d.ts",
 			"import": "./build/index.js"
+		},
+		"./testing/vitest": {
+			"types": "./build/testing/vitest.d.ts",
+			"import": "./build/testing/vitest.js"
+		},
+		"./testing/jest": {
+			"types": "./build/testing/jest.d.ts",
+			"import": "./build/testing/jest.js"
 		}
 	},
 	"scripts": {
@@ -29,6 +37,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@jest/globals": "^30.3.0",
 		"@stylistic/eslint-plugin": "^5.9.0",
 		"@types/node": "^25.3.3",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -74,6 +83,18 @@
 		"LICENSE",
 		".env.example"
 	],
+	"peerDependencies": {
+		"@jest/globals": ">=27.0.0",
+		"vitest": ">=1.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@jest/globals": {
+			"optional": true
+		},
+		"vitest": {
+			"optional": true
+		}
+	},
 	"publishConfig": {
 		"access": "public"
 	}
