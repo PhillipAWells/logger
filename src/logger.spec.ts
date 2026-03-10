@@ -107,6 +107,18 @@ describe('Logger', () => {
 			await logger.fatal('fatal message');
 			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
 		});
+
+		it('should suppress all output when level is silent', async () => {
+			const logger = new Logger({ service: 'test-service', level: LogLevel.SILENT });
+
+			await logger.debug('debug message');
+			await logger.info('info message');
+			await logger.warn('warn message');
+			await logger.error('error message');
+			await logger.fatal('fatal message');
+
+			expect(mockConsoleLog).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('log methods', () => {

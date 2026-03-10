@@ -3,14 +3,14 @@
 [![npm](https://img.shields.io/npm/v/@pawells/logger)](https://www.npmjs.com/package/@pawells/logger)
 [![GitHub Release](https://img.shields.io/github/v/release/PhillipAWells/logger)](https://github.com/PhillipAWells/logger/releases)
 [![CI](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/logger/actions/workflows/ci.yml)
-[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Structured logging library for TypeScript/Node.js with ESM, no runtime dependencies, and support for multiple transports and formatters for structured logging and log aggregation.
 
 ## Features
 
-- Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL)
+- Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL, SILENT)
 - Multiple built-in transports: Console (with ANSI colors)
 - Pluggable transport system for custom integrations
 - JSON formatter for log aggregation platforms
@@ -18,7 +18,7 @@ Structured logging library for TypeScript/Node.js with ESM, no runtime dependenc
 - Support for metadata and tracing fields (traceId, spanId, correlationId)
 - Full TypeScript support with strict typing
 - ESM-only, no runtime dependencies
-- Targets ES2022, runs on Node.js >= 24.0.0
+- Targets ES2022, runs on Node.js >= 22.0.0
 
 ## Installation
 
@@ -85,6 +85,7 @@ enum LogLevel {
   WARN = 'warn',
   ERROR = 'error',
   FATAL = 'fatal',
+  SILENT = 'silent', // suppresses all output when set as the logger level
 }
 ```
 
@@ -193,6 +194,42 @@ const logger = new Logger({
 });
 ```
 
+## Testing
+
+The package ships mock transport factories for use in unit tests. Import from the subpath that matches your test framework.
+
+### Vitest
+
+```typescript
+import { createMockTransport } from '@pawells/logger/testing/vitest';
+import { Logger, LogLevel } from '@pawells/logger';
+
+const transport = createMockTransport();
+const logger = new Logger({ service: 'my-app', level: LogLevel.DEBUG, transport });
+
+await logger.info('hello');
+
+expect(transport.write).toHaveBeenCalledOnce();
+expect(transport.write.mock.calls[0][0].message).toBe('hello');
+```
+
+### Jest
+
+```typescript
+import { createMockTransport } from '@pawells/logger/testing/jest';
+import { Logger, LogLevel } from '@pawells/logger';
+
+const transport = createMockTransport();
+const logger = new Logger({ service: 'my-app', level: LogLevel.DEBUG, transport });
+
+await logger.info('hello');
+
+expect(transport.write).toHaveBeenCalledTimes(1);
+expect(transport.write.mock.calls[0][0].message).toBe('hello');
+```
+
+`transport.write` is a typed spy (`vi.fn()` / `jest.fn()`) whose argument is `ILogEntry`, so all standard mock assertion APIs are available.
+
 ## TypeScript Support
 
 Full TypeScript support with strict typing. All types are exported for custom implementations:
@@ -226,7 +263,7 @@ yarn test:coverage  # Tests with coverage report
 
 ## Requirements
 
-- Node.js >= 24.0.0
+- Node.js >= 22.0.0
 
 ## License
 

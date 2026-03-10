@@ -1,6 +1,6 @@
 ## Project Overview
 
-`@pawells/logger` is a structured logging library for TypeScript/Node.js published to npm. It targets ES2022, is distributed as ESM, and has no runtime dependencies. The library provides configurable logging with support for multiple transports and formatters, including JSON formatting for log aggregation platforms. It exports from a single entry point (`src/index.ts`).
+`@pawells/logger` is a structured logging library for TypeScript/Node.js published to npm. It targets ES2022, is distributed as ESM, and has no runtime dependencies. The library provides configurable logging with support for multiple transports and formatters, including JSON formatting for log aggregation platforms. It exports from a primary entry point (`src/index.ts`) and testing subpath entry points (`src/testing/vitest.ts`, `src/testing/jest.ts`).
 
 ## Package Manager
 
@@ -52,6 +52,8 @@ All source lives under `src/` and is compiled to `./build/` by `tsc`.
 | `src/index.ts` | Public API re-exports |
 | `src/logger.spec.ts` | Logger tests |
 | `src/json-formatter.spec.ts` | Formatter tests |
+| `src/testing/vitest.ts` | `createMockTransport()` factory using `vi.fn()` — exported via `@pawells/logger/testing/vitest` |
+| `src/testing/jest.ts` | `createMockTransport()` factory using `jest.fn()` — exported via `@pawells/logger/testing/jest` |
 
 ### Transport pattern
 
@@ -71,7 +73,9 @@ interface ITransport {
 
 **Logger configuration**: Instantiate the `Logger` class with an `ILoggerConfig` object specifying the minimum log level and transports to use.
 
-**No runtime dependencies**: Keep `dependencies` empty in package.json. All tooling belongs in `devDependencies`.
+**No runtime dependencies**: Keep `dependencies` empty in package.json. All tooling belongs in `devDependencies`. `vitest` and `@jest/globals` are declared as optional peer dependencies (with `peerDependenciesMeta.optional: true`) because they are only needed when consuming the testing subpath exports.
+
+**Testing utilities**: `createMockTransport()` in `src/testing/vitest.ts` and `src/testing/jest.ts` return a `MockTransport` whose `write` method is a framework spy. Import from the matching subpath: `@pawells/logger/testing/vitest` or `@pawells/logger/testing/jest`.
 
 **ESM only**: The package is `"type": "module"`. Use ESM import/export syntax throughout; avoid CommonJS patterns. Internal imports must use `.js` extensions.
 
@@ -86,13 +90,13 @@ Project uses a 4-config split:
 
 Build command: `tsc --project tsconfig.build.json` (default in build script)
 
-General configuration: Requires Node.js >= 24.0.0. Outputs to `./build/`, targets ES2022, module resolution `bundler`. Declaration files (`.d.ts`) and source maps are emitted alongside JS. Strict mode is fully enabled (`strict`, `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`).
+General configuration: Requires Node.js >= 22.0.0. Outputs to `./build/`, targets ES2022, module resolution `bundler`. Declaration files (`.d.ts`) and source maps are emitted alongside JS. Strict mode is fully enabled (`strict`, `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`).
 
 ## CI/CD
 
 Single workflow (`.github/workflows/ci.yml`) triggered on push to `main`, PRs to `main`, and `v*` tags:
 
-- **All jobs**: Node pinned to 24, corepack enabled, `yarn install --immutable` for reproducible builds
+- **All jobs**: Node pinned to 22, corepack enabled, `yarn install --immutable` for reproducible builds
 - **Push to `main` / PR**: typecheck → lint → test → build
 - **Push `v*` tag**: typecheck → lint → test → build → publish to npm (with provenance) → create GitHub Release
 
