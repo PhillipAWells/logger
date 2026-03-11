@@ -9,24 +9,27 @@ const NANOSECONDS_TO_MILLISECONDS = 1000000;
  */
 export class ConsoleTransport implements ITransport {
 	private readonly config: ILoggerConfig;
+	private readonly stream: NodeJS.WritableStream;
 
 	/**
 	 * Creates a new ConsoleTransport instance.
 	 * @param config - Logger configuration object
+	 * @param stream - Writable stream to output to (defaults to process.stdout)
 	 */
-	constructor(config: ILoggerConfig) {
+	constructor(config: ILoggerConfig, stream: NodeJS.WritableStream = process.stdout) {
 		this.config = config;
+		this.stream = stream;
 	}
 
 	/**
-	 * Writes a log entry to the console.
+	 * Writes a log entry to the stream.
 	 * @param entry - The log entry to write
 	 */
 	public write(entry: ILogEntry): void {
 		const format = this.config.format ?? 'text';
 
 		if (format === 'json') {
-			console.log(formatForJson(entry));
+			this.stream.write(formatForJson(entry) + '\n');
 		} else {
 			this.writeTextFormat(entry);
 		}
@@ -55,7 +58,7 @@ export class ConsoleTransport implements ITransport {
 		}
 		const traceString = traceInfo.length > 0 ? ` [${traceInfo.join(', ')}]` : '';
 
-		console.log(`${timestamp} ${coloredLevel} [${entry.service}]${traceString} ${entry.message}${metadata}`);
+		this.stream.write(`${timestamp} ${coloredLevel} [${entry.service}]${traceString} ${entry.message}${metadata}\n`);
 	}
 
 	private colorizeLevel(level: string): string {
