@@ -8,16 +8,16 @@ import { vi } from 'vitest';
 import { Logger } from './logger.js';
 import { LogLevel } from './types.js';
 
-// Mock console.log to capture output
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
+// Mock process.stdout.write to capture output
+const mockStdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
 describe('Logger', () => {
 	beforeEach(() => {
-		mockConsoleLog.mockClear();
+		mockStdoutWrite.mockClear();
 	});
 
 	afterAll(() => {
-		mockConsoleLog.mockRestore();
+		mockStdoutWrite.mockRestore();
 	});
 
 	describe('constructor', () => {
@@ -32,11 +32,11 @@ describe('Logger', () => {
 
 			// Debug should not be logged
 			await logger.debug('debug message');
-			expect(mockConsoleLog).not.toHaveBeenCalled();
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
 
 			// Info should be logged
 			await logger.info('info message');
-			expect(mockConsoleLog).toHaveBeenCalled();
+			expect(mockStdoutWrite).toHaveBeenCalled();
 		});
 
 		it('should throw error when service name is empty', () => {
@@ -57,10 +57,10 @@ describe('Logger', () => {
 			const logger = new Logger({ service: 'test-service', level: LogLevel.INFO });
 
 			await logger.debug('debug message');
-			expect(mockConsoleLog).not.toHaveBeenCalled();
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
 
 			await logger.info('info message');
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
 		});
 
 		it('should filter info and debug when level is warn', async () => {
@@ -68,10 +68,10 @@ describe('Logger', () => {
 
 			await logger.debug('debug message');
 			await logger.info('info message');
-			expect(mockConsoleLog).not.toHaveBeenCalled();
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
 
 			await logger.warn('warn message');
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
 		});
 
 		it('should allow all levels when level is debug', async () => {
@@ -82,7 +82,7 @@ describe('Logger', () => {
 			await logger.warn('warn message');
 			await logger.error('error message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(4);
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(4);
 		});
 
 		it('should allow fatal level when level is error', async () => {
@@ -92,7 +92,7 @@ describe('Logger', () => {
 			await logger.error('error message');
 			await logger.fatal('fatal message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(2);
 		});
 
 		it('should filter all logs when level is fatal', async () => {
@@ -102,10 +102,10 @@ describe('Logger', () => {
 			await logger.info('info message');
 			await logger.warn('warn message');
 			await logger.error('error message');
-			expect(mockConsoleLog).not.toHaveBeenCalled();
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
 
 			await logger.fatal('fatal message');
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
 		});
 
 		it('should suppress all output when level is silent', async () => {
@@ -117,7 +117,7 @@ describe('Logger', () => {
 			await logger.error('error message');
 			await logger.fatal('fatal message');
 
-			expect(mockConsoleLog).not.toHaveBeenCalled();
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
 		});
 	});
 
@@ -131,8 +131,8 @@ describe('Logger', () => {
 		it('should log debug messages', async () => {
 			await logger.debug('Debug message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('DEBUG');
 			expect(loggedOutput).toContain('[test-service]');
 			expect(loggedOutput).toContain('Debug message');
@@ -141,8 +141,8 @@ describe('Logger', () => {
 		it('should log info messages', async () => {
 			await logger.info('Info message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('INFO');
 			expect(loggedOutput).toContain('[test-service]');
 			expect(loggedOutput).toContain('Info message');
@@ -151,8 +151,8 @@ describe('Logger', () => {
 		it('should log warn messages', async () => {
 			await logger.warn('Warn message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('WARN');
 			expect(loggedOutput).toContain('[test-service]');
 			expect(loggedOutput).toContain('Warn message');
@@ -161,8 +161,8 @@ describe('Logger', () => {
 		it('should log error messages', async () => {
 			await logger.error('Error message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('ERROR');
 			expect(loggedOutput).toContain('[test-service]');
 			expect(loggedOutput).toContain('Error message');
@@ -171,8 +171,8 @@ describe('Logger', () => {
 		it('should log fatal messages', async () => {
 			await logger.fatal('Fatal message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('FATAL');
 			expect(loggedOutput).toContain('[test-service]');
 			expect(loggedOutput).toContain('Fatal message');
@@ -181,8 +181,8 @@ describe('Logger', () => {
 		it('should include metadata when provided', async () => {
 			await logger.info('Message with metadata', { userId: '123', duration: '245ms' });
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('Message with metadata');
 			expect(loggedOutput).toContain('{"userId":"123","duration":"245ms"}');
 		});
@@ -190,8 +190,8 @@ describe('Logger', () => {
 		it('should not include metadata when not provided', async () => {
 			await logger.info('Message without metadata');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = mockStdoutWrite.mock.calls[0]?.[0];
 			expect(loggedOutput).toContain('Message without metadata');
 			expect(loggedOutput).not.toContain('{}');
 		});
@@ -207,8 +207,8 @@ describe('Logger', () => {
 
 			await logger.info('Test message', { userId: '123' });
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = String(mockStdoutWrite.mock.calls[0]?.[0]).trim();
 
 			// Should be valid JSON
 			const parsed = JSON.parse(loggedOutput);
@@ -226,14 +226,14 @@ describe('Logger', () => {
 
 			await logger.info('Test message');
 
-			expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-			const loggedOutput = mockConsoleLog.mock.calls[0]?.[0];
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const loggedOutput = String(mockStdoutWrite.mock.calls[0]?.[0]);
 
 			// Extract timestamp (ISO format timestamp, should be valid date)
 			expect(loggedOutput).toBeDefined();
 			// Verify no scientific notation in the timestamp (check if log contains proper date)
 			// The timestamp should be a valid ISO string that can be parsed
-			const isoMatch = loggedOutput?.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
+			const isoMatch = loggedOutput.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
 			expect(isoMatch).toBeDefined();
 		});
 	});

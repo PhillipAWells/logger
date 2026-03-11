@@ -1,3 +1,5 @@
+import type { Writable } from 'node:stream';
+
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { formatForJson } from './json-formatter.js';
 
@@ -9,14 +11,14 @@ const NANOSECONDS_TO_MILLISECONDS = 1000000;
  */
 export class ConsoleTransport implements ITransport {
 	private readonly config: ILoggerConfig;
-	private readonly stream: NodeJS.WritableStream;
+	private readonly stream: Writable;
 
 	/**
 	 * Creates a new ConsoleTransport instance.
 	 * @param config - Logger configuration object
 	 * @param stream - Writable stream to output to (defaults to process.stdout)
 	 */
-	constructor(config: ILoggerConfig, stream: NodeJS.WritableStream = process.stdout) {
+	constructor(config: ILoggerConfig, stream: Writable = process.stdout) {
 		this.config = config;
 		this.stream = stream;
 	}
