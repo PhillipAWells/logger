@@ -1,5 +1,7 @@
 import type { ILogEntry, ILoggerConfig, ITransport, IWritableStream } from './types.js';
-import { formatForJson, safeStringify } from './json-formatter.js';
+import { CreateJsonCircularReplacer } from '@pawells/typescript-common';
+
+import { formatForJson } from './json-formatter.js';
 import { NS_PER_MS } from './constants.js';
 
 /* c8 ignore start */
@@ -51,7 +53,7 @@ export class ConsoleTransport implements ITransport {
 		const level = entry.level.toUpperCase();
 		const coloredLevel = this.colorizeLevel(level);
 		const metadata = entry.metadata && Object.keys(entry.metadata).length > 0
-			? ` ${safeStringify(entry.metadata)}`
+			? ` ${JSON.stringify(entry.metadata, CreateJsonCircularReplacer())}`
 			: '';
 
 		// Build trace info string if any trace fields are present
