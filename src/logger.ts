@@ -17,14 +17,20 @@ export class Logger {
 
 	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.SILENT];
 
+	// eslint-disable-next-line no-magic-numbers
+	private static readonly MAX_SERVICE_NAME_LENGTH = 256;
+
 	/**
 	 * Creates a new Logger instance.
 	 * @param config - Configuration object with service name, optional level, format, and transport
-	 * @throws Error if service name is not provided or is empty
+	 * @throws Error if service name is not provided, is empty, or exceeds 256 characters
 	 */
 	constructor(config: ILoggerConfig) {
 		if (!config.service?.trim()) {
 			throw new Error('Logger requires a non-empty service name');
+		}
+		if (config.service.length > Logger.MAX_SERVICE_NAME_LENGTH) {
+			throw new Error(`Logger service name must not exceed ${Logger.MAX_SERVICE_NAME_LENGTH} characters`);
 		}
 
 		this.config = {

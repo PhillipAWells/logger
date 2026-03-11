@@ -50,6 +50,16 @@ describe('Logger', () => {
 		it('should throw error when service name is not provided', () => {
 			expect(() => new Logger({ service: undefined as any })).toThrow('Logger requires a non-empty service name');
 		});
+
+		it('should throw error when service name exceeds 256 characters', () => {
+			expect(() => new Logger({ service: 'a'.repeat(257) })).toThrow(
+				'Logger service name must not exceed 256 characters',
+			);
+		});
+
+		it('should accept service name at the 256-character limit', () => {
+			expect(() => new Logger({ service: 'a'.repeat(256) })).not.toThrow();
+		});
 	});
 
 	describe('log level filtering', () => {
