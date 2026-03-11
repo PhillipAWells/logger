@@ -3,7 +3,7 @@
  * ESLint rules disabled for test files:
  * - no-magic-numbers: Test data inherently uses literal numbers for assertions and test scenarios
  */
- 
+
 import { vi } from 'vitest';
 import { Logger } from './logger.js';
 import { LogLevel } from './types.js';
@@ -59,6 +59,16 @@ describe('Logger', () => {
 
 		it('should accept service name at the 256-character limit', () => {
 			expect(() => new Logger({ service: 'a'.repeat(256) })).not.toThrow();
+		});
+
+		it('should default to INFO when level is explicitly undefined', async () => {
+			const logger = new Logger({ service: 'test-service', level: undefined });
+
+			await logger.debug('debug message');
+			expect(mockStdoutWrite).not.toHaveBeenCalled();
+
+			await logger.info('info message');
+			expect(mockStdoutWrite).toHaveBeenCalled();
 		});
 	});
 

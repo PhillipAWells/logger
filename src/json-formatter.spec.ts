@@ -203,4 +203,28 @@ describe('formatForJson', () => {
 		expect(parsed.service).toBe('test-service');
 		expect(parsed.metadata.errorType).toBe('Error');
 	});
+
+	it('should return fallback JSON with typeof when a non-Error value is thrown', () => {
+		const throwingMetadata: Record<string, unknown> = {};
+		Object.defineProperty(throwingMetadata, 'bad', {
+			enumerable: true,
+			get() {
+				// eslint-disable-next-line no-throw-literal
+				throw 'string error';
+			},
+		});
+
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.ERROR,
+			service: 'test-service',
+			message: 'boom',
+			metadata: throwingMetadata,
+		};
+
+		const result = formatForJson(entry);
+		expect(() => JSON.parse(result)).not.toThrow();
+		const parsed = JSON.parse(result);
+		expect(parsed.metadata.errorType).toBe('string');
+	});
 });
