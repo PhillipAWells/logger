@@ -96,5 +96,8 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"dependencies": {
+		"@pawells/typescript-common": "^1.3.0"
 	}
 }
