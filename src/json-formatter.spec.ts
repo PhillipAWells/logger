@@ -69,6 +69,23 @@ describe('formatForJson', () => {
 		expect(parsed.metadata.self).toBe('[Circular]');
 	});
 
+	it('should not mark shared (non-circular) references as circular', () => {
+		const shared = { value: 42 };
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.DEBUG,
+			service: 'test-service',
+			message: 'Shared reference test',
+			metadata: { a: shared, b: shared },
+		};
+
+		const result = formatForJson(entry);
+		expect(() => JSON.parse(result)).not.toThrow();
+		const parsed = JSON.parse(result);
+		expect(parsed.metadata.a).toEqual({ value: 42 });
+		expect(parsed.metadata.b).toEqual({ value: 42 });
+	});
+
 	it('should return valid JSON on all inputs', () => {
 		const entries: ILogEntry[] = [
 			{
