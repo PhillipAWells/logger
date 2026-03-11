@@ -177,4 +177,30 @@ describe('formatForJson', () => {
 		expect(parsed.correlationId).toBeUndefined();
 		expect(parsed.timestamp).toBe('1705257983000000000');
 	});
+
+	it('should return fallback JSON when serialization throws', () => {
+		const throwingMetadata: Record<string, unknown> = {};
+		Object.defineProperty(throwingMetadata, 'bad', {
+			enumerable: true,
+			get() {
+				throw new Error('toJSON exploded');
+			},
+		});
+
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.ERROR,
+			service: 'test-service',
+			message: 'boom',
+			metadata: throwingMetadata,
+		};
+
+		const result = formatForJson(entry);
+		expect(() => JSON.parse(result)).not.toThrow();
+		const parsed = JSON.parse(result);
+		expect(parsed.timestamp).toBe('1705257983000000000');
+		expect(parsed.level).toBe('error');
+		expect(parsed.service).toBe('test-service');
+		expect(parsed.metadata.errorType).toBe('Error');
+	});
 });

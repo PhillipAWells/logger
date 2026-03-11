@@ -155,6 +155,16 @@ describe('ConsoleTransport', () => {
 				expect(lines()[0]).toContain(expectedCode);
 			}
 		});
+
+		it('should return level without ANSI codes for unknown level on TTY', () => {
+			const { stream, lines } = createMockStream(true);
+			const transport = new ConsoleTransport({ service: 'svc' }, stream);
+
+			transport.write({ ...baseEntry, level: 'SILENT' as LogLevel });
+
+			expect(lines()[0]).toContain('SILENT');
+			expect(lines()[0]).not.toContain('\x1b[');
+		});
 	});
 
 	describe('text format — general', () => {
