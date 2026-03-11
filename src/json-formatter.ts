@@ -28,13 +28,14 @@ export function formatForJson(entry: ILogEntry): string {
 	const { timestamp } = entry;
 	const { level } = entry;
 	const { service } = entry;
+	const { message } = entry;
 
 	try {
 		const jsonEntry: Record<string, unknown> = {
 			timestamp,
 			level,
 			service,
-			message: entry.message,
+			message,
 		};
 
 		if (entry.metadata !== undefined) {
@@ -59,7 +60,7 @@ export function formatForJson(entry: ILogEntry): string {
 			timestamp,
 			level,
 			service,
-			message: `Error formatting log entry: ${entry.message}`,
+			message: `Error formatting log entry: ${message}`,
 			metadata: {
 				originalError: String(error),
 				errorType: error instanceof Error ? error.name : typeof error,
