@@ -18,7 +18,7 @@ export default defineConfig({
         'tmp/',
         '**/*.test.ts',
         '**/*.spec.ts',
-        '**/types/**',
+        'src/types.ts',
       ],
       thresholds: {
         lines: 80,

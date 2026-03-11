@@ -23,7 +23,8 @@ function safeStringify(obj: unknown): string {
  * @returns JSON string representation of the log entry
  */
 export function formatForJson(entry: ILogEntry): string {
-	// Pre-extract critical fields before JSON.stringify to handle circular references
+	// Pre-extract critical fields so the catch block can build a safe fallback
+	// without accessing `entry` again (which may be a proxy or have side-effectful getters).
 	const { timestamp } = entry;
 	const { level } = entry;
 	const { service } = entry;

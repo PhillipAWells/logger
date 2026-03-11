@@ -1,9 +1,7 @@
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
-
-// 1 millisecond = 1,000,000 nanoseconds
-const NS_PER_MS = 1_000_000n;
+import { NS_PER_MS } from './constants.js';
 
 /**
  * Logger class providing structured logging with configurable levels and transports.

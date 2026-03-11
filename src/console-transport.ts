@@ -2,9 +2,7 @@ import type { Writable } from 'node:stream';
 
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { formatForJson } from './json-formatter.js';
-
-// 1 millisecond = 1,000,000 nanoseconds
-const NS_PER_MS = 1_000_000n;
+import { NS_PER_MS } from './constants.js';
 
 /**
  * ConsoleTransport outputs log entries to the console with ANSI color formatting.
