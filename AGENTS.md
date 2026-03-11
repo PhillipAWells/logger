@@ -46,9 +46,11 @@ All source lives under `src/` and is compiled to `./build/` by `tsc`.
 | File | Purpose |
 |------|---------|
 | `src/logger.ts` | Main `Logger` class with logging methods (debug, info, warn, error, fatal) |
-| `src/types.ts` | Type definitions: `ILogEntry`, `ILoggerConfig`, `ITransport`, `LogLevel` enum |
-| `src/console-transport.ts` | `ConsoleTransport` implementation for ANSI-colored console output |
+| `src/types.ts` | Type definitions: `ILogEntry`, `ILoggerConfig`, `ITransport`, `IWritableStream`, `LogLevel` enum |
+| `src/console-transport.ts` | `ConsoleTransport` — writes to stdout with ANSI color support |
+| `src/stderr-transport.ts` | `StderrTransport` — extends `ConsoleTransport`, writes to stderr |
 | `src/json-formatter.ts` | `formatForJson()` function for structured JSON formatting |
+| `src/constants.ts` | Shared constants (e.g. `NS_PER_MS` BigInt for timestamp conversion) |
 | `src/index.ts` | Public API re-exports |
 | `src/logger.spec.ts` | Logger tests |
 | `src/json-formatter.spec.ts` | Formatter tests |
@@ -94,11 +96,16 @@ General configuration: Requires Node.js >= 22.0.0. Outputs to `./build/`, target
 
 ## CI/CD
 
-Single workflow (`.github/workflows/ci.yml`) triggered on push to `main`, PRs to `main`, and `v*` tags:
+Two workflows under `.github/workflows/`:
 
-- **All jobs**: Node pinned to 22, corepack enabled, `yarn install --immutable` for reproducible builds
-- **Push to `main` / PR**: typecheck → lint → test → build
-- **Push `v*` tag**: typecheck → lint → test → build → publish to npm (with provenance) → create GitHub Release
+**`ci.yml`** — triggered on push to `main`, PRs to `main`, and as a reusable `workflow_call`:
+- `validate` job: typecheck → lint (Node 22)
+- `test` job: runs on Node 22 and 24 matrix
+- `build` job: depends on validate + test, compiles with `yarn build`
+
+**`publish.yml`** — triggered on `v*` tag pushes:
+- Calls `ci.yml` as a reusable workflow first
+- Then `publish` job: build → `npm publish --provenance --access public` (Node 24) → create GitHub Release via `softprops/action-gh-release@v2`
 
 ## Development Container
 
