@@ -11,7 +11,7 @@ Structured logging library for TypeScript/Node.js with ESM, no runtime dependenc
 ## Features
 
 - Structured logging with configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL, SILENT)
-- Multiple built-in transports: Console (with ANSI colors)
+- Multiple built-in transports: Console to stdout and stderr (with ANSI colors)
 - Pluggable transport system for custom integrations
 - JSON formatter for log aggregation platforms
 - Nanosecond-precision timestamps
@@ -91,16 +91,29 @@ enum LogLevel {
 
 ### ConsoleTransport
 
-Outputs log entries to the console with ANSI color formatting.
+Outputs log entries to stdout with ANSI color formatting. Colors are only applied when the stream is an interactive TTY.
 
 ```typescript
-import { ConsoleTransport, LogLevel } from '@pawells/logger';
+import { Logger, ConsoleTransport, LogLevel } from '@pawells/logger';
 
-const transport = new ConsoleTransport({ service: 'my-app', level: LogLevel.INFO });
 const logger = new Logger({
   service: 'my-app',
   level: LogLevel.INFO,
-  transport: transport,
+  transport: new ConsoleTransport({ service: 'my-app', level: LogLevel.INFO }),
+});
+```
+
+### StderrTransport
+
+Identical to `ConsoleTransport` but writes to stderr instead of stdout. Useful for servers that reserve stdout for structured protocol output (MCP, JSON-RPC, LSP, etc.).
+
+```typescript
+import { Logger, StderrTransport, LogLevel } from '@pawells/logger';
+
+const logger = new Logger({
+  service: 'my-app',
+  level: LogLevel.INFO,
+  transport: new StderrTransport({ service: 'my-app', level: LogLevel.INFO }),
 });
 ```
 
@@ -241,7 +254,9 @@ import {
   ILogEntry,
   ILoggerConfig,
   ITransport,
+  IWritableStream,
   ConsoleTransport,
+  StderrTransport,
   formatForJson,
 } from '@pawells/logger';
 ```
