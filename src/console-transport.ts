@@ -1,8 +1,16 @@
-import type { Writable } from 'node:stream';
-
-import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
+import type { ILogEntry, ILoggerConfig, ITransport, IWritableStream } from './types.js';
 import { formatForJson } from './json-formatter.js';
 import { NS_PER_MS } from './constants.js';
+
+/* c8 ignore start */
+const STDOUT: IWritableStream = typeof process !== 'undefined' && process.stdout !== null && process.stdout !== undefined
+	? process.stdout as IWritableStream
+	: {
+		write: (s: string): void => {
+			console.log(s.replace(/\n$/, ''));
+		},
+	};
+/* c8 ignore stop */
 
 /**
  * ConsoleTransport outputs log entries to the console with ANSI color formatting.
@@ -10,14 +18,14 @@ import { NS_PER_MS } from './constants.js';
  */
 export class ConsoleTransport implements ITransport {
 	private readonly config: ILoggerConfig;
-	private readonly stream: Writable;
+	private readonly stream: IWritableStream;
 
 	/**
 	 * Creates a new ConsoleTransport instance.
 	 * @param config - Logger configuration object
-	 * @param stream - Writable stream to output to (defaults to process.stdout)
+	 * @param stream - Writable stream to output to (defaults to stdout)
 	 */
-	constructor(config: ILoggerConfig, stream: Writable = process.stdout) {
+	constructor(config: ILoggerConfig, stream: IWritableStream = STDOUT) {
 		this.config = config;
 		this.stream = stream;
 	}
@@ -64,7 +72,7 @@ export class ConsoleTransport implements ITransport {
 
 	private colorizeLevel(level: string): string {
 		// Only apply ANSI color codes when writing to an interactive terminal
-		if (!(this.stream as { isTTY?: boolean }).isTTY) {
+		if (!this.stream.isTTY) {
 			return level;
 		}
 		switch (level) {

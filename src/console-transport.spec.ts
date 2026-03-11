@@ -1,19 +1,15 @@
-import { Writable } from 'node:stream';
 import { ConsoleTransport } from './console-transport.js';
 import { LogLevel } from './types.js';
-import type { ILogEntry } from './types.js';
+import type { ILogEntry, IWritableStream } from './types.js';
 
-function createMockStream(isTTY?: boolean): { stream: Writable; lines: () => string[] } {
+function createMockStream(isTTY?: boolean): { stream: IWritableStream; lines: () => string[] } {
 	const chunks: string[] = [];
-	const stream = new Writable({
-		write(chunk, _encoding, callback) {
-			chunks.push(String(chunk));
-			callback();
+	const stream: IWritableStream = {
+		write(chunk: string): void {
+			chunks.push(chunk);
 		},
-	});
-	if (isTTY !== undefined) {
-		(stream as Writable & { isTTY?: boolean }).isTTY = isTTY;
-	}
+		...(isTTY !== undefined && { isTTY }),
+	};
 	return { stream, lines: () => chunks };
 }
 

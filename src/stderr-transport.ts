@@ -1,5 +1,15 @@
-import type { ILoggerConfig } from './types.js';
+import type { ILoggerConfig, IWritableStream } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
+
+/* c8 ignore start */
+const STDERR: IWritableStream = typeof process !== 'undefined' && process.stderr !== null && process.stderr !== undefined
+	? process.stderr as IWritableStream
+	: {
+		write: (s: string): void => {
+			console.error(s.replace(/\n$/, ''));
+		},
+	};
+/* c8 ignore stop */
 
 /**
  * StderrTransport outputs log entries to stderr instead of stdout.
@@ -11,6 +21,6 @@ import { ConsoleTransport } from './console-transport.js';
  */
 export class StderrTransport extends ConsoleTransport {
 	constructor(config: ILoggerConfig) {
-		super(config, process.stderr);
+		super(config, STDERR);
 	}
 }
