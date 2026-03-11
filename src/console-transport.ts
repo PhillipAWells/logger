@@ -1,7 +1,16 @@
-import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
+import type { ILogEntry, ILoggerConfig, ITransport, IWritableStream } from './types.js';
 import { formatForJson } from './json-formatter.js';
+import { NS_PER_MS } from './constants.js';
 
-const NANOSECONDS_TO_MILLISECONDS = 1000000;
+/* c8 ignore start */
+const STDOUT: IWritableStream = typeof process !== 'undefined' && process.stdout !== null && process.stdout !== undefined
+	? process.stdout as IWritableStream
+	: {
+		write: (s: string): void => {
+			console.log(s.replace(/\n$/, ''));
+		},
+	};
+/* c8 ignore stop */
 
 /**
  * ConsoleTransport outputs log entries to the console with ANSI color formatting.
@@ -9,24 +18,27 @@ const NANOSECONDS_TO_MILLISECONDS = 1000000;
  */
 export class ConsoleTransport implements ITransport {
 	private readonly config: ILoggerConfig;
+	private readonly stream: IWritableStream;
 
 	/**
 	 * Creates a new ConsoleTransport instance.
 	 * @param config - Logger configuration object
+	 * @param stream - Writable stream to output to (defaults to stdout)
 	 */
-	constructor(config: ILoggerConfig) {
+	constructor(config: ILoggerConfig, stream: IWritableStream = STDOUT) {
 		this.config = config;
+		this.stream = stream;
 	}
 
 	/**
-	 * Writes a log entry to the console.
+	 * Writes a log entry to the stream.
 	 * @param entry - The log entry to write
 	 */
 	public write(entry: ILogEntry): void {
 		const format = this.config.format ?? 'text';
 
 		if (format === 'json') {
-			console.log(formatForJson(entry));
+			this.stream.write(formatForJson(entry) + '\n');
 		} else {
 			this.writeTextFormat(entry);
 		}
@@ -34,7 +46,7 @@ export class ConsoleTransport implements ITransport {
 
 	private writeTextFormat(entry: ILogEntry): void {
 		// Convert nanosecond timestamp string back to milliseconds for Date constructor
-		const timestampMs = Number(entry.timestamp) / NANOSECONDS_TO_MILLISECONDS;
+		const timestampMs = Number(BigInt(entry.timestamp) / NS_PER_MS);
 		const timestamp = new Date(timestampMs).toISOString();
 		const level = entry.level.toUpperCase();
 		const coloredLevel = this.colorizeLevel(level);
@@ -55,10 +67,14 @@ export class ConsoleTransport implements ITransport {
 		}
 		const traceString = traceInfo.length > 0 ? ` [${traceInfo.join(', ')}]` : '';
 
-		console.log(`${timestamp} ${coloredLevel} [${entry.service}]${traceString} ${entry.message}${metadata}`);
+		this.stream.write(`${timestamp} ${coloredLevel} [${entry.service}]${traceString} ${entry.message}${metadata}\n`);
 	}
 
 	private colorizeLevel(level: string): string {
+		// Only apply ANSI color codes when writing to an interactive terminal
+		if (!this.stream.isTTY) {
+			return level;
+		}
 		switch (level) {
 			case 'DEBUG':
 				return `\x1b[36m${level}\x1b[0m`; // Cyan

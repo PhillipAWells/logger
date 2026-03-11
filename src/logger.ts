@@ -1,8 +1,7 @@
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
- 
-const NANOSECONDS_PER_MILLISECOND = 1_000_000_000n;
+import { NS_PER_MS } from './constants.js';
 
 /**
  * Logger class providing structured logging with configurable levels and transports.
@@ -16,14 +15,20 @@ export class Logger {
 
 	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.SILENT];
 
+	// eslint-disable-next-line no-magic-numbers
+	private static readonly MAX_SERVICE_NAME_LENGTH = 256;
+
 	/**
 	 * Creates a new Logger instance.
 	 * @param config - Configuration object with service name, optional level, format, and transport
-	 * @throws Error if service name is not provided or is empty
+	 * @throws Error if service name is not provided, is empty, or exceeds 256 characters
 	 */
 	constructor(config: ILoggerConfig) {
 		if (!config.service?.trim()) {
 			throw new Error('Logger requires a non-empty service name');
+		}
+		if (config.service.length > Logger.MAX_SERVICE_NAME_LENGTH) {
+			throw new Error(`Logger service name must not exceed ${Logger.MAX_SERVICE_NAME_LENGTH} characters`);
 		}
 
 		this.config = {
@@ -39,8 +44,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async debug(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public debug(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.DEBUG, message, metadata);
 	}
 
@@ -49,8 +53,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async info(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public info(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.INFO, message, metadata);
 	}
 
@@ -59,8 +62,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async warn(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public warn(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.WARN, message, metadata);
 	}
 
@@ -69,8 +71,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async error(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public error(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.ERROR, message, metadata);
 	}
 
@@ -79,8 +80,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async fatal(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public fatal(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.FATAL, message, metadata);
 	}
 
@@ -90,7 +90,7 @@ export class Logger {
 		}
 
 		const entry: ILogEntry = {
-			timestamp: (BigInt(Date.now()) * NANOSECONDS_PER_MILLISECOND).toString(), // Unix epoch nanoseconds as string using BigInt
+			timestamp: (BigInt(Date.now()) * NS_PER_MS).toString(), // Unix epoch nanoseconds as string using BigInt
 			level,
 			service: this.config.service,
 			message,

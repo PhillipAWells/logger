@@ -28,3 +28,8 @@ export interface ILoggerConfig {
 export interface ITransport {
 	write(entry: ILogEntry): void | Promise<void>;
 }
+
+export interface IWritableStream {
+	write(chunk: string): boolean | void;
+	isTTY?: boolean;
+}
