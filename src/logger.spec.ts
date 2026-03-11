@@ -222,19 +222,22 @@ describe('Logger', () => {
 
 	describe('nanosecond timestamps', () => {
 		it('should generate nanosecond timestamps as proper decimal strings (not scientific notation)', async () => {
+			const before = Date.now();
 			const logger = new Logger({ service: 'test-service', level: LogLevel.DEBUG });
 
 			await logger.info('Test message');
 
+			const after = Date.now();
+
 			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
 			const loggedOutput = String(mockStdoutWrite.mock.calls[0]?.[0]);
 
-			// Extract timestamp (ISO format timestamp, should be valid date)
-			expect(loggedOutput).toBeDefined();
-			// Verify no scientific notation in the timestamp (check if log contains proper date)
-			// The timestamp should be a valid ISO string that can be parsed
+			// The rendered ISO timestamp must be a current-era date (not distant past/future)
 			const isoMatch = loggedOutput.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
-			expect(isoMatch).toBeDefined();
+			expect(isoMatch).not.toBeNull();
+			const renderedMs = new Date(isoMatch![0]).getTime();
+			expect(renderedMs).toBeGreaterThanOrEqual(before);
+			expect(renderedMs).toBeLessThanOrEqual(after);
 		});
 	});
 

@@ -2,7 +2,8 @@ import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
  
-const NANOSECONDS_PER_MILLISECOND = 1_000_000_000n;
+// 1 millisecond = 1,000,000 nanoseconds
+const NS_PER_MS = 1_000_000n;
 
 /**
  * Logger class providing structured logging with configurable levels and transports.
@@ -90,7 +91,7 @@ export class Logger {
 		}
 
 		const entry: ILogEntry = {
-			timestamp: (BigInt(Date.now()) * NANOSECONDS_PER_MILLISECOND).toString(), // Unix epoch nanoseconds as string using BigInt
+			timestamp: (BigInt(Date.now()) * NS_PER_MS).toString(), // Unix epoch nanoseconds as string using BigInt
 			level,
 			service: this.config.service,
 			message,
