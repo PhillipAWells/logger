@@ -59,7 +59,10 @@ export function formatForJson(entry: ILogEntry): string {
 			level,
 			service,
 			message: `Error formatting log entry: ${entry.message}`,
-			metadata: { originalError: String(error) },
+			metadata: {
+				originalError: String(error),
+				errorType: error instanceof Error ? error.name : typeof error,
+			},
 		});
 	}
 }
