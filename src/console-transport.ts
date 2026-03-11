@@ -65,6 +65,10 @@ export class ConsoleTransport implements ITransport {
 	}
 
 	private colorizeLevel(level: string): string {
+		// Only apply ANSI color codes when writing to an interactive terminal
+		if (!(this.stream as { isTTY?: boolean }).isTTY) {
+			return level;
+		}
 		switch (level) {
 			case 'DEBUG':
 				return `\x1b[36m${level}\x1b[0m`; // Cyan
