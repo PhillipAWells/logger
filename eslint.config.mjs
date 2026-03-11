@@ -123,7 +123,6 @@ export default [
 			'@typescript-eslint/prefer-includes': 'warn',
 			'@typescript-eslint/prefer-string-starts-ends-with': 'warn',
 			'@typescript-eslint/prefer-readonly': 'warn',
-			'@typescript-eslint/promise-function-async': ['warn', { checkArrowFunctions: false }],
 			'@typescript-eslint/return-await': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
 

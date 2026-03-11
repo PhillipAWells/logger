@@ -4,7 +4,7 @@ import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { formatForJson } from './json-formatter.js';
 
 // 1 millisecond = 1,000,000 nanoseconds
-const NS_PER_MS = 1_000_000;
+const NS_PER_MS = 1_000_000n;
 
 /**
  * ConsoleTransport outputs log entries to the console with ANSI color formatting.
@@ -40,7 +40,7 @@ export class ConsoleTransport implements ITransport {
 
 	private writeTextFormat(entry: ILogEntry): void {
 		// Convert nanosecond timestamp string back to milliseconds for Date constructor
-		const timestampMs = Number(entry.timestamp) / NS_PER_MS;
+		const timestampMs = Number(BigInt(entry.timestamp) / NS_PER_MS);
 		const timestamp = new Date(timestampMs).toISOString();
 		const level = entry.level.toUpperCase();
 		const coloredLevel = this.colorizeLevel(level);

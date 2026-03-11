@@ -1,7 +1,7 @@
 import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
- 
+
 // 1 millisecond = 1,000,000 nanoseconds
 const NS_PER_MS = 1_000_000n;
 
@@ -46,8 +46,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async debug(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public debug(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.DEBUG, message, metadata);
 	}
 
@@ -56,8 +55,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async info(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public info(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.INFO, message, metadata);
 	}
 
@@ -66,8 +64,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async warn(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public warn(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.WARN, message, metadata);
 	}
 
@@ -76,8 +73,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async error(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public error(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.ERROR, message, metadata);
 	}
 
@@ -86,8 +82,7 @@ export class Logger {
 	 * @param message - The message to log
 	 * @param metadata - Optional metadata object to include with the log entry
 	 */
-	// eslint-disable-next-line require-await
-	public async fatal(message: string, metadata?: Record<string, unknown>): Promise<void> {
+	public fatal(message: string, metadata?: Record<string, unknown>): Promise<void> {
 		return this.log(LogLevel.FATAL, message, metadata);
 	}
 
