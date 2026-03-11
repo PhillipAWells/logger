@@ -18,7 +18,7 @@ describe('formatForJson', () => {
 		expect(parsed.level).toBe('info');
 		expect(parsed.service).toBe('test-service');
 		expect(parsed.message).toBe('Test message');
-		expect(parsed.metadata).toEqual({});
+		expect(parsed.metadata).toBeUndefined();
 	});
 
 	it('should include metadata when provided', () => {

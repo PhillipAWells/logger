@@ -34,8 +34,11 @@ export function formatForJson(entry: ILogEntry): string {
 			level,
 			service,
 			message: entry.message,
-			metadata: entry.metadata ?? {},
 		};
+
+		if (entry.metadata !== undefined) {
+			jsonEntry.metadata = entry.metadata;
+		}
 
 		// Add optional trace fields if present
 		if (entry.traceId) {

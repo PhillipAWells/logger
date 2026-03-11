@@ -218,6 +218,20 @@ describe('Logger', () => {
 			expect(parsed.metadata).toEqual({ userId: '123' });
 			expect(typeof parsed.timestamp).toBe('string');
 		});
+
+		it('should omit metadata field from JSON when not provided', async () => {
+			const logger = new Logger({
+				service: 'test-service',
+				level: LogLevel.INFO,
+				format: 'json',
+			});
+
+			await logger.info('No metadata');
+
+			expect(mockStdoutWrite).toHaveBeenCalledTimes(1);
+			const parsed = JSON.parse(String(mockStdoutWrite.mock.calls[0]?.[0]).trim());
+			expect(parsed.metadata).toBeUndefined();
+		});
 	});
 
 	describe('nanosecond timestamps', () => {
