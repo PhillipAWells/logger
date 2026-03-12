@@ -2,6 +2,7 @@ import type { ILogEntry, ILoggerConfig, ITransport } from './types.js';
 import { LogLevel } from './types.js';
 import { ConsoleTransport } from './console-transport.js';
 import { NS_PER_MS } from './constants.js';
+import { EnumValues, IS_BLANK_STRING } from '@pawells/typescript-common';
 
 /**
  * Logger class providing structured logging with configurable levels and transports.
@@ -13,7 +14,7 @@ export class Logger {
 
 	private readonly transport: ITransport;
 
-	private static readonly LEVELS = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.SILENT];
+	private static readonly LEVELS = EnumValues(LogLevel);
 
 	// eslint-disable-next-line no-magic-numbers
 	private static readonly MAX_SERVICE_NAME_LENGTH = 256;
@@ -24,7 +25,7 @@ export class Logger {
 	 * @throws Error if service name is not provided, is empty, or exceeds 256 characters
 	 */
 	constructor(config: ILoggerConfig) {
-		if (!config.service?.trim()) {
+		if (!config.service || IS_BLANK_STRING(config.service)) {
 			throw new Error('Logger requires a non-empty service name');
 		}
 		if (config.service.length > Logger.MAX_SERVICE_NAME_LENGTH) {
