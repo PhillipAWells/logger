@@ -106,7 +106,7 @@ describe('Logger', () => {
 			expect(mockStdoutWrite).toHaveBeenCalledTimes(4);
 		});
 
-		it('should allow fatal level when level is error', async () => {
+		it('should log error and fatal when level is error', async () => {
 			const logger = new Logger({ service: 'test-service', level: LogLevel.ERROR });
 
 			await logger.warn('warn message');
@@ -116,7 +116,7 @@ describe('Logger', () => {
 			expect(mockStdoutWrite).toHaveBeenCalledTimes(2);
 		});
 
-		it('should filter all logs when level is fatal', async () => {
+		it('should filter all non-fatal messages when level is fatal', async () => {
 			const logger = new Logger({ service: 'test-service', level: LogLevel.FATAL });
 
 			await logger.debug('debug message');
@@ -330,6 +330,13 @@ describe('Logger', () => {
 
 		it('should omit metadata for undefined', async () => {
 			await logger.info('msg', undefined);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toBeUndefined();
+		});
+
+		it('should omit metadata for an empty object', async () => {
+			await logger.info('msg', {});
 
 			const entry = mockTransport.write.mock.calls[0]?.[0];
 			expect(entry.metadata).toBeUndefined();

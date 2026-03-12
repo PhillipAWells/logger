@@ -92,7 +92,11 @@ export class Logger {
 			return { error: metadata.message, name: metadata.name, stack: metadata.stack };
 		}
 		if (typeof metadata === 'object' && !Array.isArray(metadata)) {
-			return metadata as Record<string, unknown>;
+			const obj = metadata as Record<string, unknown>;
+			if (Object.keys(obj).length === 0) {
+				return undefined;
+			}
+			return obj;
 		}
 		return { value: metadata };
 	}
