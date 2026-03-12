@@ -5,6 +5,32 @@ import { NS_PER_MS } from './constants.js';
 import { EnumValues, IS_BLANK_STRING } from '@pawells/typescript-common';
 
 /**
+ * Normalises arbitrary metadata into a plain object suitable for use in a log entry.
+ *
+ * - `null` / `undefined` → `undefined` (omitted from the entry)
+ * - Empty plain object `{}` → `undefined` (omitted from the entry)
+ * - `Error` → `{ error: message, name, stack }`
+ * - Array or primitive → `{ value: metadata }`
+ * - Plain object with at least one key → passed through as-is
+ */
+export function normalizeMetadata(metadata: unknown): Record<string, unknown> | undefined {
+	if (metadata === null || metadata === undefined) {
+		return undefined;
+	}
+	if (metadata instanceof Error) {
+		return { error: metadata.message, name: metadata.name, stack: metadata.stack };
+	}
+	if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+		const obj = metadata as Record<string, unknown>;
+		if (Object.keys(obj).length === 0) {
+			return undefined;
+		}
+		return obj;
+	}
+	return { value: metadata };
+}
+
+/**
  * Logger class providing structured logging with configurable levels and transports.
  * Supports multiple log levels (DEBUG, INFO, WARN, ERROR, FATAL) and pluggable transports
  * for custom delivery mechanisms.
@@ -86,20 +112,7 @@ export class Logger {
 	}
 
 	private static normalizeMetadata(metadata: unknown): Record<string, unknown> | undefined {
-		if (metadata === null || metadata === undefined) {
-			return undefined;
-		}
-		if (metadata instanceof Error) {
-			return { error: metadata.message, name: metadata.name, stack: metadata.stack };
-		}
-		if (typeof metadata === 'object' && !Array.isArray(metadata)) {
-			const obj = metadata as Record<string, unknown>;
-			if (Object.keys(obj).length === 0) {
-				return undefined;
-			}
-			return obj;
-		}
-		return { value: metadata };
+		return normalizeMetadata(metadata);
 	}
 
 	private async log(level: LogLevel, message: string, metadata?: unknown): Promise<void> {
