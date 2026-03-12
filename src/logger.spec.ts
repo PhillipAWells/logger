@@ -7,6 +7,7 @@
 import { vi } from 'vitest';
 import { Logger } from './logger.js';
 import { LogLevel } from './types.js';
+import { createMockTransport, type MockTransport } from './testing/vitest.js';
 
 // Mock process.stdout.write to capture output
 const mockStdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
@@ -105,7 +106,7 @@ describe('Logger', () => {
 			expect(mockStdoutWrite).toHaveBeenCalledTimes(4);
 		});
 
-		it('should allow fatal level when level is error', async () => {
+		it('should log error and fatal when level is error', async () => {
 			const logger = new Logger({ service: 'test-service', level: LogLevel.ERROR });
 
 			await logger.warn('warn message');
@@ -115,7 +116,7 @@ describe('Logger', () => {
 			expect(mockStdoutWrite).toHaveBeenCalledTimes(2);
 		});
 
-		it('should filter all logs when level is fatal', async () => {
+		it('should filter all non-fatal messages when level is fatal', async () => {
 			const logger = new Logger({ service: 'test-service', level: LogLevel.FATAL });
 
 			await logger.debug('debug message');
@@ -272,6 +273,87 @@ describe('Logger', () => {
 			const renderedMs = new Date(isoMatch![0]).getTime();
 			expect(renderedMs).toBeGreaterThanOrEqual(before);
 			expect(renderedMs).toBeLessThanOrEqual(after);
+		});
+	});
+
+	describe('metadata normalisation', () => {
+		let mockTransport: MockTransport;
+		let logger: Logger;
+
+		beforeEach(() => {
+			mockTransport = createMockTransport();
+			logger = new Logger({ service: 'test-service', level: LogLevel.DEBUG, transport: mockTransport });
+		});
+
+		it('should normalise Error to { error, name, stack }', async () => {
+			const err = new Error('ECONNREFUSED');
+			await logger.error('connection failed', err);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toEqual({ error: 'ECONNREFUSED', name: 'Error', stack: err.stack });
+		});
+
+		it('should pass plain objects through unchanged', async () => {
+			await logger.info('msg', { userId: '42', count: 1 });
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toEqual({ userId: '42', count: 1 });
+		});
+
+		it('should wrap a string primitive in { value }', async () => {
+			await logger.info('msg', 'some-string');
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toEqual({ value: 'some-string' });
+		});
+
+		it('should wrap a number primitive in { value }', async () => {
+			await logger.info('msg', 42);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toEqual({ value: 42 });
+		});
+
+		it('should wrap an array in { value }', async () => {
+			await logger.info('msg', [1, 2, 3]);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toEqual({ value: [1, 2, 3] });
+		});
+
+		it('should omit metadata for null', async () => {
+			await logger.info('msg', null);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toBeUndefined();
+		});
+
+		it('should omit metadata for undefined', async () => {
+			await logger.info('msg', undefined);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toBeUndefined();
+		});
+
+		it('should omit metadata for an empty object', async () => {
+			await logger.info('msg', {});
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toBeUndefined();
+		});
+
+		it('should preserve custom Error subclass name and message', async () => {
+			class DatabaseError extends Error {
+				constructor(msg: string) {
+					super(msg);
+					this.name = 'DatabaseError';
+				}
+			}
+			const err = new DatabaseError('query timeout');
+			await logger.error('db error', err);
+
+			const entry = mockTransport.write.mock.calls[0]?.[0];
+			expect(entry.metadata).toMatchObject({ error: 'query timeout', name: 'DatabaseError' });
 		});
 	});
 

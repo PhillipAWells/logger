@@ -21,6 +21,21 @@ describe('formatForJson', () => {
 		expect(parsed.metadata).toBeUndefined();
 	});
 
+	it('should omit metadata field when metadata is an empty object', () => {
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.INFO,
+			service: 'test-service',
+			message: 'Test message',
+			metadata: {},
+		};
+
+		const result = formatForJson(entry);
+		const parsed = JSON.parse(result);
+
+		expect(parsed.metadata).toBeUndefined();
+	});
+
 	it('should include metadata when provided', () => {
 		const entry: ILogEntry = {
 			timestamp: '1705257983000000000',
@@ -67,6 +82,23 @@ describe('formatForJson', () => {
 		expect(() => JSON.parse(result)).not.toThrow();
 		const parsed = JSON.parse(result);
 		expect(parsed.metadata.self).toBe('[Circular]');
+	});
+
+	it('should not mark shared (non-circular) references as circular', () => {
+		const shared = { value: 42 };
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.DEBUG,
+			service: 'test-service',
+			message: 'Shared reference test',
+			metadata: { a: shared, b: shared },
+		};
+
+		const result = formatForJson(entry);
+		expect(() => JSON.parse(result)).not.toThrow();
+		const parsed = JSON.parse(result);
+		expect(parsed.metadata.a).toEqual({ value: 42 });
+		expect(parsed.metadata.b).toEqual({ value: 42 });
 	});
 
 	it('should return valid JSON on all inputs', () => {

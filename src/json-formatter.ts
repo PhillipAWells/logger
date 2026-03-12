@@ -1,20 +1,6 @@
-import type { ILogEntry } from './types.js';
+import { CreateJsonCircularReplacer } from '@pawells/typescript-common';
 
-/**
- * Safely converts a value to JSON string, handling circular references.
- * @param obj - The object to stringify
- * @returns JSON string representation
- */
-function safeStringify(obj: unknown): string {
-	const seen = new WeakSet();
-	return JSON.stringify(obj, (_key, value: unknown) => {
-		if (typeof value === 'object' && value !== null) {
-			if (seen.has(value as object)) return '[Circular]';
-			seen.add(value as object);
-		}
-		return value;
-	});
-}
+import type { ILogEntry } from './types.js';
 
 /**
  * Formats a log entry as structured JSON for log aggregation platforms.
@@ -25,19 +11,17 @@ function safeStringify(obj: unknown): string {
 export function formatForJson(entry: ILogEntry): string {
 	// Pre-extract critical fields so the catch block can build a safe fallback
 	// without accessing `entry` again (which may be a proxy or have side-effectful getters).
-	const { timestamp } = entry;
-	const { level } = entry;
-	const { service } = entry;
+	const { timestamp, level, service, message } = entry;
 
 	try {
 		const jsonEntry: Record<string, unknown> = {
 			timestamp,
 			level,
 			service,
-			message: entry.message,
+			message,
 		};
 
-		if (entry.metadata !== undefined) {
+		if (entry.metadata !== undefined && Object.keys(entry.metadata).length > 0) {
 			jsonEntry.metadata = entry.metadata;
 		}
 
@@ -52,18 +36,18 @@ export function formatForJson(entry: ILogEntry): string {
 			jsonEntry.correlationId = entry.correlationId;
 		}
 
-		return safeStringify(jsonEntry);
+		return JSON.stringify(jsonEntry, CreateJsonCircularReplacer());
 	} catch (error) {
 		// Don't use console - return a safe fallback JSON string
-		return safeStringify({
+		return JSON.stringify({
 			timestamp,
 			level,
 			service,
-			message: `Error formatting log entry: ${entry.message}`,
+			message: `Error formatting log entry: ${message}`,
 			metadata: {
 				originalError: String(error),
 				errorType: error instanceof Error ? error.name : typeof error,
 			},
-		});
+		}, CreateJsonCircularReplacer());
 	}
 }

@@ -1,9 +1,14 @@
+/**
+ * Log severity levels in ascending order.
+ * Use `SILENT` to suppress all log output.
+ */
 export enum LogLevel {
 	DEBUG = 'debug',
 	INFO = 'info',
 	WARN = 'warn',
 	ERROR = 'error',
 	FATAL = 'fatal',
+	/** Special level that suppresses all log output when set as the minimum level. */
 	SILENT = 'silent',
 }
 
@@ -31,5 +36,6 @@ export interface ITransport {
 
 export interface IWritableStream {
 	write(chunk: string): boolean | void;
+	/** Whether the stream is a TTY (interactive terminal). `undefined` is treated as `false` (no ANSI colours). */
 	isTTY?: boolean;
 }

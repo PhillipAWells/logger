@@ -203,6 +203,29 @@ describe('ConsoleTransport', () => {
 
 			expect(lines()[0]).not.toContain('{}');
 		});
+
+		it('should handle circular references in metadata without throwing', () => {
+			const { stream, lines } = createMockStream();
+			const transport = new ConsoleTransport({ service: 'test-service' }, stream);
+			const circular: Record<string, unknown> = { prop: 'value' };
+			circular.self = circular;
+
+			expect(() => transport.write({ ...baseEntry, metadata: circular })).not.toThrow();
+			expect(lines()[0]).toContain('[Circular]');
+		});
+
+		it('should serialize shared references correctly in metadata', () => {
+			const { stream, lines } = createMockStream();
+			const transport = new ConsoleTransport({ service: 'test-service' }, stream);
+			const shared = { x: 1 };
+
+			transport.write({ ...baseEntry, metadata: { a: shared, b: shared } });
+
+			const [output] = lines();
+			expect(output).toContain('"a":{"x":1}');
+			expect(output).toContain('"b":{"x":1}');
+			expect(output).not.toContain('[Circular]');
+		});
 	});
 
 	describe('JSON format', () => {

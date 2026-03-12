@@ -209,7 +209,7 @@ const logger = new Logger({
 
 ## Testing
 
-The package ships mock transport factories for use in unit tests. Import from the subpath that matches your test framework.
+The package ships mock transport factories for use in unit tests. Import from the subpath that matches your test framework. These subpath exports require the matching testing framework as a peer dependency — `vitest` for `@pawells/logger/testing/vitest`, `@jest/globals` for `@pawells/logger/testing/jest`. Both are optional; only install the one you use.
 
 ### Vitest
 
@@ -258,8 +258,14 @@ import {
   ConsoleTransport,
   StderrTransport,
   formatForJson,
+  normalizeMetadata,
+  NS_PER_MS,
 } from '@pawells/logger';
 ```
+
+`normalizeMetadata(metadata: unknown)` applies the same metadata normalisation rules the `Logger` uses internally: `null`/`undefined`/empty objects → `undefined`; `Error` → `{ error, name, stack }`; arrays and primitives → `{ value }`; plain objects passed through. Useful when building custom transports or formatters that need consistent metadata handling.
+
+`NS_PER_MS` (`1_000_000n`) is the BigInt conversion factor used to convert a millisecond `Date.now()` value to the nanosecond string stored in `ILogEntry.timestamp`.
 
 ## Development
 
