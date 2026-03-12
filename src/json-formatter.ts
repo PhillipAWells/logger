@@ -11,10 +11,7 @@ import type { ILogEntry } from './types.js';
 export function formatForJson(entry: ILogEntry): string {
 	// Pre-extract critical fields so the catch block can build a safe fallback
 	// without accessing `entry` again (which may be a proxy or have side-effectful getters).
-	const { timestamp } = entry;
-	const { level } = entry;
-	const { service } = entry;
-	const { message } = entry;
+	const { timestamp, level, service, message } = entry;
 
 	try {
 		const jsonEntry: Record<string, unknown> = {
@@ -24,7 +21,7 @@ export function formatForJson(entry: ILogEntry): string {
 			message,
 		};
 
-		if (entry.metadata !== undefined) {
+		if (entry.metadata !== undefined && Object.keys(entry.metadata).length > 0) {
 			jsonEntry.metadata = entry.metadata;
 		}
 

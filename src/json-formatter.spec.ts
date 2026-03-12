@@ -21,6 +21,21 @@ describe('formatForJson', () => {
 		expect(parsed.metadata).toBeUndefined();
 	});
 
+	it('should omit metadata field when metadata is an empty object', () => {
+		const entry: ILogEntry = {
+			timestamp: '1705257983000000000',
+			level: LogLevel.INFO,
+			service: 'test-service',
+			message: 'Test message',
+			metadata: {},
+		};
+
+		const result = formatForJson(entry);
+		const parsed = JSON.parse(result);
+
+		expect(parsed.metadata).toBeUndefined();
+	});
+
 	it('should include metadata when provided', () => {
 		const entry: ILogEntry = {
 			timestamp: '1705257983000000000',
